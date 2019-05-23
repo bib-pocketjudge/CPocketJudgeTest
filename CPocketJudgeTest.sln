@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPocketJudgeTest", "CPocketJudgeTest\CPocketJudgeTest.csproj", "{B41130F6-5AD5-4915-B8A5-F7BCBAA8DFBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B41130F6-5AD5-4915-B8A5-F7BCBAA8DFBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B41130F6-5AD5-4915-B8A5-F7BCBAA8DFBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B41130F6-5AD5-4915-B8A5-F7BCBAA8DFBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B41130F6-5AD5-4915-B8A5-F7BCBAA8DFBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8FA9D2D0-1BF3-4650-A2BB-B73F432BE69D}
+	EndGlobalSection
+EndGlobal
