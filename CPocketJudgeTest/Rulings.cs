@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace CPocketJudgeTest
 {
     /// <summary>
     /// Class that contains rulings of a Magic: The Gathering(c) card.
     /// </summary>
-    class Rulings
+    public partial class Rulings
     {
         /*
         {
@@ -48,7 +48,19 @@ namespace CPocketJudgeTest
         } 
         */
 
-        public bool has_more { get; set; }
+        public Datum[] data { get; set; }
 
     }
+
+    public partial class Datum
+    {
+        public Guid oracle_id { get; set; }
+
+        public string source { get; set; }
+
+        public DateTimeOffset published_at { get; set; }
+
+        public string comment { get; set; }
+    }
+
 }

@@ -62,30 +62,15 @@ namespace CPocketJudgeTest
         /// </summary>
         /// <param name="json_string">URL to rulings of a specific card.</param>
         /// <returns></returns>
-        public static string GetRuling(string json_string)
+        public static string GetRulingJSON(string search_option, string name)
         {
-            string ruling_url = "";
-
-            try
-            {
-                var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
-                Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
-                Console.WriteLine("Deserialized : \n {0}", cardJSON.rulings_uri.ToString());
-
-                //Assigns the rulings_uri from a card to the string.
-                ruling_url = cardJSON.rulings_uri.ToString();
-            }
-            catch (Exception deserialise_JSON_ex)
-            {
-                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
-                throw;
-            }
 
             string responseFromServer = "";
 
-            Console.WriteLine(ruling_url);
+            string url = "https://api.scryfall.com/cards/named?" + search_option + "=" + name;
+            Console.WriteLine(url);
 
-            WebRequest request = WebRequest.Create(ruling_url);
+            WebRequest request = WebRequest.Create(url);
 
             WebResponse response = request.GetResponse();
 
@@ -98,14 +83,37 @@ namespace CPocketJudgeTest
                 // Read the content.  
                 responseFromServer = reader.ReadToEnd();
 
-                // Display the content deserialised.  
-                deserialiseJSON_dynamic(responseFromServer);
             }
 
-            // Close the response.  
-            response.Close();
+            //get card_rulings_url from deserialized card json
+            string card_rulings_url = deserialiseJSON_For_Rulings(responseFromServer);
 
-            return responseFromServer;
+            Console.WriteLine(card_rulings_url);
+
+            string responseFromServer_rulings = "";
+
+            WebRequest rulings_request = WebRequest.Create(card_rulings_url);
+
+            WebResponse rulings_response = rulings_request.GetResponse();
+
+            Console.WriteLine(" This : " + ((HttpWebResponse)rulings_response).StatusDescription);
+
+            using (Stream dataStream = rulings_response.GetResponseStream())
+            {
+                // Open the stream using a StreamReader for easy access.  
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.  
+                responseFromServer_rulings = reader.ReadToEnd();
+
+            }
+
+            //deserialize rulings
+            deserialiseJSON_Rulings(responseFromServer_rulings);
+
+            // Close the response.  
+            rulings_response.Close();
+            return responseFromServer_rulings;
+
         }
 
         /// <summary>
@@ -174,6 +182,7 @@ namespace CPocketJudgeTest
             {
                 var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
                 //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+
                 Console.WriteLine("Printing card");
                 PrintCard(cardJSON);
             }
@@ -184,12 +193,15 @@ namespace CPocketJudgeTest
             }
         }
 
-        public static void deserialiseJSON_Ruling(string json_string)
+        public static void deserialiseJSON_Rulings(string json_string)
         {
             try
             {
-                var rulingJSON = JsonConvert.DeserializeObject<Rulings>(json_string);
-                Console.WriteLine("Deserialized : \n {0}", rulingJSON.ToString());
+                var rulingsJSON = JsonConvert.DeserializeObject<Rulings>(json_string);
+                //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+
+                Console.WriteLine("Printing rulings");
+                PrintRulings(rulingsJSON);
             }
             catch (Exception deserialise_JSON_ex)
             {
@@ -198,7 +210,35 @@ namespace CPocketJudgeTest
             }
         }
 
+        /// <summary>
+        /// Get rulings uri for further processing.
+        /// </summary>
+        /// <param name="json_string"></param>
+        /// <returns></returns>
+        public static string deserialiseJSON_For_Rulings(string json_string)
+        {
+            try
+            {
+                var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
+                //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+
+                string rulings_uri_string = cardJSON.rulings_uri.ToString();
+
+                Console.WriteLine("Rulings url : {0}",rulings_uri_string);
+
+                return rulings_uri_string;
+            }
+            catch (Exception deserialise_JSON_ex)
+            {
+                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
+                throw;
+            }
+    
+        }
+
         #endregion
+
+        #region Print Objects
 
         /// <summary>
         /// A function that prints information of a card.
@@ -220,6 +260,30 @@ namespace CPocketJudgeTest
             Console.WriteLine("Oracle text : {0}", card.oracle_text.ToString());
             Console.WriteLine("Rulings URI : {0}", card.rulings_uri.ToString());
         }
+
+        /// <summary>
+        /// A function that prints the rulings of a card.
+        /// </summary>
+        /// <param name="rulings">Class containing rules changes and/or additions to a Magic: The Gathering(c) card.</param>
+        public static void PrintRulings(Rulings rulings)
+        {
+            Datum[] data = rulings.data;
+
+            foreach (var item in data)
+            {
+                Console.WriteLine("--");
+                Console.WriteLine("Oracle ID   : {0}", item.oracle_id.ToString());
+                Console.WriteLine("Source      : {0}", item.source);
+                Console.WriteLine("Published   : {0}", item.published_at.ToString());
+
+                Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+                Console.WriteLine("    Comment:");
+                Console.WriteLine("    {0}", item.comment);
+                Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -316,8 +380,9 @@ namespace CPocketJudgeTest
                 RMenu();
             }
             Console.WriteLine();
-            GetRuling(GetCardJSON(search_option.ToLower(), name.ToLower()));
+            GetRulingJSON(search_option.ToLower(), name.ToLower());
         }
+
         #endregion
 
         #region Help
@@ -332,9 +397,6 @@ namespace CPocketJudgeTest
             {
                 case "-g":
                     HelpToG();
-                    break;
-                case "-r":
-                    Console.WriteLine("--TODO--");
                     break;
                 default:
                     ShowHelp();
