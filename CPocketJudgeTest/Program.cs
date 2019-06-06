@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace CPocketJudgeTest
@@ -60,7 +56,8 @@ namespace CPocketJudgeTest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="json_string">URL to rulings of a specific card.</param>
+        /// <param name="search_option">Specifies a search option.</param>
+        /// <param name="name">Specifies a name format.</param>
         /// <returns></returns>
         public static string GetRulingJSON(string search_option, string name)
         {
@@ -147,6 +144,7 @@ namespace CPocketJudgeTest
             // Display the content.  
             //serialised
             //Console.WriteLine(responseFromServer);
+
             //deserialised
             deserialiseJSON_Card(responseFromServer);
 
@@ -220,7 +218,6 @@ namespace CPocketJudgeTest
             try
             {
                 var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
-                //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
 
                 string rulings_uri_string = cardJSON.rulings_uri.ToString();
 
@@ -333,22 +330,31 @@ namespace CPocketJudgeTest
                 Console.WriteLine("\nHopefully your question has been answered\n");
                 GMenu();
             }
-            Console.WriteLine();
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
-            Console.WriteLine("For...                                                   (see help using -h for more information about name formatting)");
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
-            Console.Write("name : ");
-            name = Console.ReadLine();
-            if (name == "-h")
+            else
             {
-                search_option = "";
-                name = "";
-                HelpToG_nameFormatting();
-                Console.WriteLine("\nHopefully your question has been answered\n");
-                GMenu();
+                Console.WriteLine();
+                Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
+                Console.WriteLine("For...                                                   (see help using -h for more information about name formatting)");
+                Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
+                Console.Write("name : ");
+                name = Console.ReadLine();
+
+                if (name == "-h")
+                {
+                    search_option = "";
+                    name = "";
+                    HelpToG_nameFormatting();
+                    Console.WriteLine("\nHopefully your question has been answered\n");
+                    GMenu();
+                }
+                else
+                {
+                    Console.WriteLine();
+                    GetCardJSON(search_option.ToLower(), name.ToLower());
+                }
+                
             }
-            Console.WriteLine();
-            GetCardJSON(search_option.ToLower(), name.ToLower());
+            
         }
 
         public static void RMenu()
@@ -365,22 +371,31 @@ namespace CPocketJudgeTest
                 Console.WriteLine("\nHopefully your question has been answered\n");
                 RMenu();
             }
-            Console.WriteLine();
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
-            Console.WriteLine("For...                                                   (see help using -h for more information about name formatting)");
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
-            Console.Write("name : ");
-            name = Console.ReadLine();
-            if (name == "-h")
+            else
             {
-                search_option = "";
-                name = "";
-                HelpToG_nameFormatting();
-                Console.WriteLine("\nHopefully your question has been answered\n");
-                RMenu();
+                Console.WriteLine();
+                Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
+                Console.WriteLine("For...                                                   (see help using -h for more information about name formatting)");
+                Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------");
+                Console.Write("name : ");
+                name = Console.ReadLine();
+
+                if (name == "-h")
+                {
+                    search_option = "";
+                    name = "";
+                    HelpToG_nameFormatting();
+                    Console.WriteLine("\nHopefully your question has been answered\n");
+                    RMenu();
+                }
+                else
+                {
+                    Console.WriteLine();
+                    GetRulingJSON(search_option.ToLower(), name.ToLower());
+                }
+                
             }
-            Console.WriteLine();
-            GetRulingJSON(search_option.ToLower(), name.ToLower());
+            
         }
 
         #endregion
@@ -396,6 +411,9 @@ namespace CPocketJudgeTest
             switch (ti)
             {
                 case "-g":
+                    HelpToG();
+                    break;
+                case "-r":
                     HelpToG();
                     break;
                 default:
