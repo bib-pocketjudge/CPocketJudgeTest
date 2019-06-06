@@ -5,7 +5,7 @@ namespace CPocketJudgeTest
     /// <summary>
     /// Class that represents a Magic: The Gathering(c) card.
     /// </summary>
-    class Card
+    public class Card
     {
         public string oracle_id { get; set; }
         public string name { get; set; }

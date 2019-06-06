@@ -53,234 +53,238 @@ namespace CPocketJudgeTest
 
         #region Functions
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="search_option">Specifies a search option.</param>
-        /// <param name="name">Specifies a name format.</param>
-        /// <returns></returns>
-        public static string GetRulingJSON(string search_option, string name)
-        {
+            #region GetJSON_functions
 
-            string responseFromServer = "";
-
-            string url = "https://api.scryfall.com/cards/named?" + search_option + "=" + name;
-            Console.WriteLine(url);
-
-            WebRequest request = WebRequest.Create(url);
-
-            WebResponse response = request.GetResponse();
-
-            Console.WriteLine(" This : " + ((HttpWebResponse)response).StatusDescription);
-
-            using (Stream dataStream = response.GetResponseStream())
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="search_option">Specifies a search option.</param>
+            /// <param name="name">Specifies a name format.</param>
+            /// <returns></returns>
+            public static string GetRulingJSON(string search_option, string name)
             {
-                // Open the stream using a StreamReader for easy access.  
-                StreamReader reader = new StreamReader(dataStream);
-                // Read the content.  
-                responseFromServer = reader.ReadToEnd();
+
+                string responseFromServer = "";
+
+                string url = "https://api.scryfall.com/cards/named?" + search_option + "=" + name;
+                Console.WriteLine(url);
+
+                WebRequest request = WebRequest.Create(url);
+
+                WebResponse response = request.GetResponse();
+
+                Console.WriteLine(" This : " + ((HttpWebResponse)response).StatusDescription);
+
+                using (Stream dataStream = response.GetResponseStream())
+                {
+                    // Open the stream using a StreamReader for easy access.  
+                    StreamReader reader = new StreamReader(dataStream);
+                    // Read the content.  
+                    responseFromServer = reader.ReadToEnd();
+
+                }
+
+                //get card_rulings_url from deserialized card json
+                string card_rulings_url = deserialiseJSON_For_Rulings(responseFromServer);
+
+                Console.WriteLine(card_rulings_url);
+
+                string responseFromServer_rulings = "";
+
+                WebRequest rulings_request = WebRequest.Create(card_rulings_url);
+
+                WebResponse rulings_response = rulings_request.GetResponse();
+
+                Console.WriteLine(" This : " + ((HttpWebResponse)rulings_response).StatusDescription);
+
+                using (Stream dataStream = rulings_response.GetResponseStream())
+                {
+                    // Open the stream using a StreamReader for easy access.  
+                    StreamReader reader = new StreamReader(dataStream);
+                    // Read the content.  
+                    responseFromServer_rulings = reader.ReadToEnd();
+
+                }
+
+                //deserialize rulings
+                deserialiseJSON_Rulings(responseFromServer_rulings);
+
+                // Close the response.  
+                rulings_response.Close();
+                return responseFromServer_rulings;
 
             }
 
-            //get card_rulings_url from deserialized card json
-            string card_rulings_url = deserialiseJSON_For_Rulings(responseFromServer);
-
-            Console.WriteLine(card_rulings_url);
-
-            string responseFromServer_rulings = "";
-
-            WebRequest rulings_request = WebRequest.Create(card_rulings_url);
-
-            WebResponse rulings_response = rulings_request.GetResponse();
-
-            Console.WriteLine(" This : " + ((HttpWebResponse)rulings_response).StatusDescription);
-
-            using (Stream dataStream = rulings_response.GetResponseStream())
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="search_option">Specifies a search option.</param>
+            /// <param name="name">Specifies a name format.</param>
+            /// <returns></returns>
+            public static string GetCardJSON(string search_option, string name)
             {
-                // Open the stream using a StreamReader for easy access.  
-                StreamReader reader = new StreamReader(dataStream);
-                // Read the content.  
-                responseFromServer_rulings = reader.ReadToEnd();
+                string responseFromServer = "";
 
+                string url = "https://api.scryfall.com/cards/named?" + search_option + "=" + name;
+                Console.WriteLine(url);
+
+                WebRequest request = WebRequest.Create(url);
+
+                WebResponse response = request.GetResponse();
+
+                Console.WriteLine(" This : " + ((HttpWebResponse)response).StatusDescription);
+
+                using (Stream dataStream = response.GetResponseStream())
+                {
+                    // Open the stream using a StreamReader for easy access.  
+                    StreamReader reader = new StreamReader(dataStream);
+                    // Read the content.  
+                    responseFromServer = reader.ReadToEnd();
+
+                }
+
+                // Display the content.  
+                //serialised
+                //Console.WriteLine(responseFromServer);
+
+                //deserialised
+                deserialiseJSON_Card(responseFromServer);
+
+                // Close the response.  
+                response.Close();
+                return responseFromServer;
             }
 
-            //deserialize rulings
-            deserialiseJSON_Rulings(responseFromServer_rulings);
+            #endregion
 
-            // Close the response.  
-            rulings_response.Close();
-            return responseFromServer_rulings;
+            #region DeserializeJSON_functions
 
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="search_option">Specifies a search option.</param>
-        /// <param name="name">Specifies a name format.</param>
-        /// <returns></returns>
-        public static string GetCardJSON(string search_option, string name)
-        {
-            string responseFromServer = "";
-
-            string url = "https://api.scryfall.com/cards/named?" + search_option + "=" + name;
-            Console.WriteLine(url);
-
-            WebRequest request = WebRequest.Create(url);
-
-            WebResponse response = request.GetResponse();
-
-            Console.WriteLine(" This : " + ((HttpWebResponse)response).StatusDescription);
-
-            using (Stream dataStream = response.GetResponseStream())
+            public static void deserialiseJSON_dynamic(string json_string)
             {
-                // Open the stream using a StreamReader for easy access.  
-                StreamReader reader = new StreamReader(dataStream);
-                // Read the content.  
-                responseFromServer = reader.ReadToEnd();
+                try
+                {
+                    var cardJSON = JsonConvert.DeserializeObject<dynamic>(json_string);
+                    Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
 
+                    /*Does work...safe to use???
+                    Console.WriteLine("Deserialized : \n {0}", cardJSON.oracle_text.ToString());
+                    Console.WriteLine("Deserialized : \n {0}", cardJSON.rulings_uri.ToString());
+                    */
+                }
+                catch (Exception deserialise_JSON_ex)
+                {
+                    Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
+                    throw;
+                }
             }
 
-            // Display the content.  
-            //serialised
-            //Console.WriteLine(responseFromServer);
-
-            //deserialised
-            deserialiseJSON_Card(responseFromServer);
-
-            // Close the response.  
-            response.Close();
-            return responseFromServer;
-        }
-
-        #region JSON_functions
-
-        public static void deserialiseJSON_dynamic(string json_string)
-        {
-            try
+            public static void deserialiseJSON_Card(string json_string)
             {
-                var cardJSON = JsonConvert.DeserializeObject<dynamic>(json_string);
-                Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+                try
+                {
+                    var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
+                    //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
 
-                /*Does work...safe to use???
-                Console.WriteLine("Deserialized : \n {0}", cardJSON.oracle_text.ToString());
-                Console.WriteLine("Deserialized : \n {0}", cardJSON.rulings_uri.ToString());
-                */
+                    Console.WriteLine("Printing card");
+                    PrintCard(cardJSON);
+                }
+                catch (Exception deserialise_JSON_ex)
+                {
+                    Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
+                    throw;
+                }
             }
-            catch (Exception deserialise_JSON_ex)
+
+            public static void deserialiseJSON_Rulings(string json_string)
             {
-                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
-                throw;
-            }
-        }
+                try
+                {
+                    var rulingsJSON = JsonConvert.DeserializeObject<Rulings>(json_string);
+                    //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
 
-        public static void deserialiseJSON_Card(string json_string)
-        {
-            try
+                    Console.WriteLine("Printing rulings");
+                    PrintRulings(rulingsJSON);
+                }
+                catch (Exception deserialise_JSON_ex)
+                {
+                    Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
+                    throw;
+                }
+            }
+
+            /// <summary>
+            /// Get rulings uri for further processing.
+            /// </summary>
+            /// <param name="json_string"></param>
+            /// <returns></returns>
+            public static string deserialiseJSON_For_Rulings(string json_string)
             {
-                var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
-                //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+                try
+                {
+                    var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
 
-                Console.WriteLine("Printing card");
-                PrintCard(cardJSON);
-            }
-            catch (Exception deserialise_JSON_ex)
-            {
-                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
-                throw;
-            }
-        }
+                    string rulings_uri_string = cardJSON.rulings_uri.ToString();
 
-        public static void deserialiseJSON_Rulings(string json_string)
-        {
-            try
-            {
-                var rulingsJSON = JsonConvert.DeserializeObject<Rulings>(json_string);
-                //Console.WriteLine("Deserialized : \n {0}", cardJSON.ToString());
+                    Console.WriteLine("Rulings url : {0}",rulings_uri_string);
 
-                Console.WriteLine("Printing rulings");
-                PrintRulings(rulingsJSON);
-            }
-            catch (Exception deserialise_JSON_ex)
-            {
-                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get rulings uri for further processing.
-        /// </summary>
-        /// <param name="json_string"></param>
-        /// <returns></returns>
-        public static string deserialiseJSON_For_Rulings(string json_string)
-        {
-            try
-            {
-                var cardJSON = JsonConvert.DeserializeObject<Card>(json_string);
-
-                string rulings_uri_string = cardJSON.rulings_uri.ToString();
-
-                Console.WriteLine("Rulings url : {0}",rulings_uri_string);
-
-                return rulings_uri_string;
-            }
-            catch (Exception deserialise_JSON_ex)
-            {
-                Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
-                throw;
-            }
+                    return rulings_uri_string;
+                }
+                catch (Exception deserialise_JSON_ex)
+                {
+                    Console.WriteLine("Error : {0}", deserialise_JSON_ex.Source);
+                    throw;
+                }
     
-        }
-
-        #endregion
-
-        #region Print Objects
-
-        /// <summary>
-        /// A function that prints information of a card.
-        /// </summary>
-        /// <param name="card">Class that defines a Magic: The Gathering(c) card.</param>
-        public static void PrintCard(Card card)
-        {
-            Console.WriteLine("Oracle ID   : {0}", card.oracle_id.ToString());
-            Console.WriteLine("Name        : {0}", card.name.ToString());
-            Console.WriteLine("Small img   : {0}", card.image_uris.small.ToString());
-            Console.WriteLine("Normal img  : {0}", card.image_uris.normal.ToString());
-            Console.WriteLine("Large img   : {0}", card.image_uris.large.ToString());
-            Console.WriteLine("Img as png  : {0}", card.image_uris.png.ToString());
-            Console.WriteLine("Art crop    : {0}", card.image_uris.art_crop.ToString());
-            Console.WriteLine("Border crop : {0}", card.image_uris.border_crop.ToString());
-            Console.WriteLine("Mana cost   : {0}", card.mana_cost.ToString());
-            Console.WriteLine("CMC         : {0}", card.cmc.ToString());
-            Console.WriteLine("Type line   : {0}", card.type_line.ToString());
-            Console.WriteLine("Oracle text : {0}", card.oracle_text.ToString());
-            Console.WriteLine("Rulings URI : {0}", card.rulings_uri.ToString());
-        }
-
-        /// <summary>
-        /// A function that prints the rulings of a card.
-        /// </summary>
-        /// <param name="rulings">Class containing rules changes and/or additions to a Magic: The Gathering(c) card.</param>
-        public static void PrintRulings(Rulings rulings)
-        {
-            Datum[] data = rulings.data;
-
-            foreach (var item in data)
-            {
-                Console.WriteLine("--");
-                Console.WriteLine("Oracle ID   : {0}", item.oracle_id.ToString());
-                Console.WriteLine("Source      : {0}", item.source);
-                Console.WriteLine("Published   : {0}", item.published_at.ToString());
-
-                Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-                Console.WriteLine("    Comment:");
-                Console.WriteLine("    {0}", item.comment);
-                Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
             }
-        }
 
-        #endregion
+            #endregion
+
+            #region Print Objects
+
+            /// <summary>
+            /// A function that prints information of a card.
+            /// </summary>
+            /// <param name="card">Class that defines a Magic: The Gathering(c) card.</param>
+            public static void PrintCard(Card card)
+            {
+                Console.WriteLine("Oracle ID   : {0}", card.oracle_id.ToString());
+                Console.WriteLine("Name        : {0}", card.name.ToString());
+                Console.WriteLine("Small img   : {0}", card.image_uris.small.ToString());
+                Console.WriteLine("Normal img  : {0}", card.image_uris.normal.ToString());
+                Console.WriteLine("Large img   : {0}", card.image_uris.large.ToString());
+                Console.WriteLine("Img as png  : {0}", card.image_uris.png.ToString());
+                Console.WriteLine("Art crop    : {0}", card.image_uris.art_crop.ToString());
+                Console.WriteLine("Border crop : {0}", card.image_uris.border_crop.ToString());
+                Console.WriteLine("Mana cost   : {0}", card.mana_cost.ToString());
+                Console.WriteLine("CMC         : {0}", card.cmc.ToString());
+                Console.WriteLine("Type line   : {0}", card.type_line.ToString());
+                Console.WriteLine("Oracle text : {0}", card.oracle_text.ToString());
+                Console.WriteLine("Rulings URI : {0}", card.rulings_uri.ToString());
+            }
+
+            /// <summary>
+            /// A function that prints the rulings of a card.
+            /// </summary>
+            /// <param name="rulings">Class containing rules changes and/or additions to a Magic: The Gathering(c) card.</param>
+            public static void PrintRulings(Rulings rulings)
+            {
+                Datum[] data = rulings.data;
+
+                foreach (var item in data)
+                {
+                    Console.WriteLine("--");
+                    Console.WriteLine("Oracle ID   : {0}", item.oracle_id.ToString());
+                    Console.WriteLine("Source      : {0}", item.source);
+                    Console.WriteLine("Published   : {0}", item.published_at.ToString());
+
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+                    Console.WriteLine("    Comment:");
+                    Console.WriteLine("    {0}", item.comment);
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+                }
+            }
+
+            #endregion
 
         #endregion
 
@@ -351,6 +355,7 @@ namespace CPocketJudgeTest
                 {
                     Console.WriteLine();
                     GetCardJSON(search_option.ToLower(), name.ToLower());
+                    Console.WriteLine();
                 }
                 
             }
